@@ -1,8 +1,17 @@
 const express = require('express');
 
-function createApp() {
+const createIssuingRouter = require('./issuing');
+const createColumnRouter = require('./column');
+const { stripeRouter, paypalRouter, gocardlessRouter } = require('./payments');
+
+function createApp({ lithicClient, columnRequest, stripeClient, paypalRequest, gocardlessRequest } = {}) {
   const app = express();
   app.use(express.json());
+  app.use('/issuing', createIssuingRouter(lithicClient));
+  app.use('/banking', createColumnRouter(columnRequest));
+  app.use('/payments/stripe', stripeRouter(stripeClient));
+  app.use('/payments/paypal', paypalRouter(paypalRequest));
+  app.use('/payments/gocardless', gocardlessRouter(gocardlessRequest));
 
   const accounts = new Map();
   let nextId = 1;
